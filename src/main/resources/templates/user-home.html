@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <title>Manage Books | Dashboard</title>
+</head>
+<body>
+<nav class="navbar  navbar-expand-lg bg-body-tertiary">
+    <div class="container">
+        <a class="navbar-brand" href="#">Library</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" th:text="${userdetail.fullname}">
+                        Username
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li  sec:authorize="isAuthenticated"><a class="dropdown-item" th:href="@{/logout}">Log Out</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <form class="d-flex" role="search">
+                <input class="form-control me-2" type="search" name="searchQuery" placeholder="Search Books" aria-label="Search">
+                <script>
+                    document.getElementById('searchForm').addEventListener('submit', function(e) {
+                        e.preventDefault();
+
+                        const formData = new FormData(this);
+                        const searchQuery = formData.get('searchQuery');
+                        fetch('/search', {
+                            method: 'POST',
+                            body: JSON.stringify({searchQuery}),
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                            })
+                            .catch(error => console.error('Error:', error));
+                    });
+                </script>
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+</nav>
+<div th:if="${message}" id="delete-alert" class="alert alert-danger text-center">
+    <p style="margin-bottom: 0;" th:text = "${message}"></p>
+</div>
+<div th:if="${borrow}" id="borrow-alert" class="alert alert-success text-center">
+    <p style="margin-bottom: 0;"> you borrowed book </p>
+</div>
+<div>
+    <div th:if="${alreadyReturned}" id="alreadyReturned" class="alert alert-danger text-center">
+        <p style="margin-bottom: 0;" th:text = "${alreadyReturned}"></p>
+    </div>
+</div>
+</div>
+
+<script>
+    setTimeout(function() {
+        document.getElementById('delete-alert').style.display = 'none';
+    }, 1500);
+    setTimeout(function() {
+        document.getElementById('borrow-alert').style.display = 'none';
+    }, 1500);
+    setTimeout(function() {
+        document.getElementById('alreadyReturned').style.display = 'none';
+    }, 1500);
+</script>
+
+<table style="" class="table table-striped table-hover container table-bordered">
+    <div class="container text-center mt-3" style="background-image: url('/libraryPhoto.webp'); background-size: cover; background-position: center center;">
+        <h1 class="display-1 text-center" style="color: #333; font-family: 'Arial', sans-serif; text-shadow: 2px 2px 5px rgba(0,0,0,0.5);">Books</h1>
+        <div class="table-responsive">
+        </div>
+    </div>
+    <thead>
+    <tr>
+        <th scope="col">Title</th>
+        <th scope="col">Author</th>
+        <th scope="col">ISBN</th>
+        <th scope="col">Genre</th>
+        <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="book : ${books}">
+        <th th:text="${book.title}" scope="row">1</th>
+        <td th:text="${book.author}">Mark</td>
+        <td th:text="${book.isbn}">Otto</td>
+        <td th:text="${book.genre}">@mdo</td>
+        <td>
+            <a th:href="@{'/user-home/borrow/' + ${book.id}}"  type="button" class="btn btn-warning">Borrow</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<table style="" class="table table-striped table-hover container table-bordered">
+    <div class="container text-center mt-3">
+        <h1 class="display-1 text-center" style="color: #333; font-family: 'Arial', sans-serif; text-shadow: 2px 2px 5px rgba(0,0,0,0.5);">Borrowed books
+            <img src="/borBok.jpeg" alt="Icon" style="height: 50px;">
+        </h1>
+        <div class="table-responsive">
+        </div>
+    </div>
+    <thead>
+    <tr>
+        <th scope="col">ISBN</th>
+        <th scope="col">Title</th>
+        <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="borrowedBook : ${borrowedBooks}">
+        <th th:text="${borrowedBook.isbn}" scope="row">1</th>
+        <td th:text="${borrowedBook.title}">Mark</td>
+        <td>
+            <a th:href="@{'/user-home/return/' + ${borrowedBook.id}}" type="button" class="btn btn-danger">Put</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
